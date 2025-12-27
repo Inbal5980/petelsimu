@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חדר בועות הפטל - אפליקציית המחשה</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffecd2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* No body scroll */
+        }
+
+        /* Strict 16:9 Container */
+        .container {
+            position: relative;
+            /* Logic to fit 16:9 perfectly inside viewport */
+            width: 100vw;
+            height: 56.25vw; /* 100 * 9 / 16 */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 100 * 16 / 9 */
+            
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.5vh;
+            box-shadow: 0 2vh 4vh rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 1vh;
+            text-align: center;
+            box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.2);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3vh;
+            text-shadow: 0.2vh 0.2vh 0.4vh rgba(0,0,0,0.3);
+            margin-bottom: 0.2vh;
+        }
+
+        .header p {
+            color: #fff;
+            font-size: 1.8vh;
+            margin: 0;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            padding: 1.5vh;
+            gap: 1.5vh;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* Left Side: Bubbles */
+        .bubbles-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .bubble-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 1.5vh;
+            padding: 1vh;
+            backdrop-filter: blur(5px);
+            border: 0.2vh solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* Crucial for scrolling inside flex item */
+        }
+
+        .bubble-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8vh;
+            padding: 0 0.5vh;
+            flex-shrink: 0;
+        }
+
+        .bubble-header h2 {
+            color: white;
+            font-size: 2.2vh;
+            text-shadow: 0.1vh 0.1vh 0.2vh rgba(0,0,0,0.3);
+        }
+
+        .bubble-count {
+            background: white;
+            color: #764ba2;
+            padding: 0.3vh 1.2vh;
+            border-radius: 2vh;
+            font-size: 2vh;
+            font-weight: bold;
+            min-width: 4vh;
+            text-align: center;
+        }
+
+        .bubbles-display {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8vh;
+            padding: 0.8vh;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1vh;
+            overflow-y: auto; /* Internal scroll only */
+            align-content: flex-start;
+        }
+
+        /* Custom Scrollbar */
+        .bubbles-display::-webkit-scrollbar { width: 0.8vh; }
+        .bubbles-display::-webkit-scrollbar-track { background: transparent; }
+        .bubbles-display::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 0.4vh; }
+
+        .bubble {
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5vh;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: inset -0.3vh -0.3vh 0.6vh rgba(0,0,0,0.2), 0 0.3vh 0.6vh rgba(255,255,255,0.4);
+            flex-shrink: 0;
+        }
+
+        .bubble-small {
+            width: 3.8vh;
+            height: 3.8vh;
+            background: radial-gradient(circle at 30% 30%, #ff6b9d, #c44569);
+        }
+
+        .bubble-large {
+            width: 5.5vh;
+            height: 5.5vh;
+            background: radial-gradient(circle at 30% 30%, #ff8fab, #d55f89);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-0.5vh); }
+        }
+
+        /* Right Side: Controls */
+        .control-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .control-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1.5vh;
+            padding: 1.5vh;
+            backdrop-filter: blur(5px);
+            border: 0.2vh solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top control box (Buttons) shouldn't grow too much */
+        .control-box.actions {
+            flex: 0 0 auto;
+        }
+        
+        /* Bottom control box (Stats) fills remaining space */
+        .control-box.stats {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden; /* Prevent overflow */
+        }
+
+        .control-box h3 {
+            color: white;
+            font-size: 2vh;
+            margin-bottom: 1vh;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1vh;
+            margin-bottom: 1vh;
+        }
+
+        button {
+            flex: 1;
+            padding: 1vh;
+            font-size: 1.8vh;
+            font-weight: bold;
+            border: none;
+            border-radius: 1vh;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0.3vh 0.6vh rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .btn-add { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+        .btn-remove { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+        .btn-reset { background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%); color: white; }
+        button:hover { transform: translateY(-0.2vh); box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); }
+        button:active { transform: translateY(0); }
+
+        .info-box {
+            background: white;
+            padding: 1vh;
+            border-radius: 1vh;
+            flex: 1; /* Allow to take space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6vh 1vh;
+            margin-bottom: 0.6vh;
+            background: #f8f9fa;
+            border-radius: 0.6vh;
+            font-size: 1.6vh;
+        }
+
+        .info-label { color: #764ba2; font-weight: bold; }
+        .info-value { color: #f5576c; font-weight: bold; font-size: 2vh; }
+
+        .total-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1vh;
+            border-radius: 1vh;
+            text-align: center;
+            font-size: 2vh;
+            font-weight: bold;
+            margin-top: 1vh;
+            flex-shrink: 0;
+        }
+
+        .formula-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1vh;
+            border-radius: 1vh;
+            margin-top: 1vh;
+            border: 0.2vh dashed #764ba2;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 5vh;
+        }
+
+        .formula {
+            text-align: center;
+            font-size: 1.8vh;
+            color: #764ba2;
+            font-weight: bold;
+            direction: ltr;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🫧 חֶדֶר בּוּעוֹת הַפֶּטֶל 🫧</h1>
+            <p>הוֹסִיפוּ בּוּעוֹת קְטַנּוֹת וְרַאוּ כֵּיצַד נוֹצָרוֹת 3 בּוּעוֹת גְּדוֹלוֹת נוֹסָפוֹת!</p>
+        </div>
+
+        <div class="main-content">
+            <!-- אזור הבועות (שמאל) -->
+            <div class="bubbles-section">
+                <div class="bubble-container">
+                    <div class="bubble-header">
+                        <h2>🫧 קְטַנּוֹת</h2>
+                        <div class="bubble-count" id="smallCount">0</div>
+                    </div>
+                    <div class="bubbles-display" id="smallBubbles"></div>
+                </div>
+
+                <div class="bubble-container">
+                    <div class="bubble-header">
+                        <h2>🫧 גְּדוֹלוֹת (+3)</h2>
+                        <div class="bubble-count" id="largeCount">0</div>
+                    </div>
+                    <div class="bubbles-display" id="largeBubbles"></div>
+                </div>
+            </div>
+
+            <!-- פאנל בקרה (ימין) -->
+            <div class="control-panel">
+                <div class="control-box actions">
+                    <h3>🎮 בִּקָּרָה</h3>
+                    <div class="buttons">
+                        <button class="btn-add" onclick="addBubble()">➕ הוֹסֵף</button>
+                        <button class="btn-remove" onclick="removeBubble()">➖ הָסֵר</button>
+                    </div>
+                    <button class="btn-reset" onclick="resetAll()">🔄 אִפּוּס הַכֹּל</button>
+                </div>
+
+                <div class="control-box stats">
+                    <h3>📊 סִיכּוּם</h3>
+                    <div class="info-box">
+                        <div class="info-row">
+                            <span class="info-label">קְטַנּוֹת:</span>
+                            <span class="info-value" id="infoSmall">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">גְּדוֹלוֹת:</span>
+                            <span class="info-value" id="infoLarge">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">הֶפְרֵשׁ:</span>
+                            <span class="info-value" id="infoDiff">0</span>
+                        </div>
+                    </div>
+                    <div class="total-box">
+                        <div>סַךְ הַכֹּל</div>
+                        <div id="totalBubbles" style="font-size: 3vh; margin-top: 0.5vh; line-height: 1;">0</div>
+                    </div>
+                    <div class="formula-box">
+                        <div class="formula" id="formula">הוֹסִיפוּ בּוּעוֹת!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let smallBubbles = 0;
+        let largeBubbles = 0;
+
+        function updateDisplay() {
+            // Update counts
+            document.getElementById('smallCount').textContent = smallBubbles;
+            document.getElementById('largeCount').textContent = largeBubbles;
+            document.getElementById('infoSmall').textContent = smallBubbles;
+            document.getElementById('infoLarge').textContent = largeBubbles;
+            document.getElementById('infoDiff').textContent = largeBubbles - smallBubbles;
+            document.getElementById('totalBubbles').textContent = smallBubbles + largeBubbles;
+
+            // Update formula
+            if (smallBubbles > 0) {
+                document.getElementById('formula').innerHTML = 
+                    `${smallBubbles} + ${largeBubbles} = ${smallBubbles + largeBubbles}<br>` +
+                    `<span style="font-size: 1.4vh; color: #666; font-weight: normal;">(קְטַנּוֹת + גְּדוֹלוֹת = סַךְ הַכֹּל)</span>`;
+            } else {
+                document.getElementById('formula').textContent = 'הוֹסִיפוּ בּוּעוֹת!';
+            }
+
+            // Render bubbles
+            renderBubbles('smallBubbles', smallBubbles, 'bubble-small');
+            renderBubbles('largeBubbles', largeBubbles, 'bubble-large');
+        }
+
+        function renderBubbles(containerId, count, className) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = `bubble ${className}`;
+                // Stagger animation slightly
+                bubble.style.animationDelay = `${(i % 10) * 0.1}s`; 
+                bubble.textContent = '🫧';
+                container.appendChild(bubble);
+            }
+        }
+
+        function addBubble() {
+            smallBubbles++;
+            largeBubbles = smallBubbles + 3;
+            updateDisplay();
+        }
+
+        function removeBubble() {
+            if (smallBubbles > 0) {
+                smallBubbles--;
+                largeBubbles = smallBubbles + 3;
+                updateDisplay();
+            }
+        }
+
+        function resetAll() {
+            smallBubbles = 0;
+            largeBubbles = 0;
+            updateDisplay();
+        }
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
