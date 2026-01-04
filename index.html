@@ -19,18 +19,16 @@
             align-items: center;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* No body scroll */
+            overflow: hidden;
         }
 
         /* Strict 16:9 Container */
         .container {
             position: relative;
-            /* Logic to fit 16:9 perfectly inside viewport */
             width: 100vw;
-            height: 56.25vw; /* 100 * 9 / 16 */
+            height: 56.25vw;
             max-height: 100vh;
-            max-width: 177.78vh; /* 100 * 16 / 9 */
-            
+            max-width: 177.78vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 1.5vh;
             box-shadow: 0 2vh 4vh rgba(0,0,0,0.3);
@@ -92,7 +90,7 @@
             border: 0.2vh solid rgba(255, 255, 255, 0.2);
             display: flex;
             flex-direction: column;
-            min-height: 0; /* Crucial for scrolling inside flex item */
+            min-height: 0;
         }
 
         .bubble-header {
@@ -129,11 +127,10 @@
             padding: 0.8vh;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 1vh;
-            overflow-y: auto; /* Internal scroll only */
+            overflow-y: auto;
             align-content: flex-start;
         }
 
-        /* Custom Scrollbar */
         .bubbles-display::-webkit-scrollbar { width: 0.8vh; }
         .bubbles-display::-webkit-scrollbar-track { background: transparent; }
         .bubbles-display::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 0.4vh; }
@@ -186,17 +183,8 @@
             flex-direction: column;
         }
 
-        /* Top control box (Buttons) shouldn't grow too much */
-        .control-box.actions {
-            flex: 0 0 auto;
-        }
-        
-        /* Bottom control box (Stats) fills remaining space */
-        .control-box.stats {
-            flex: 1;
-            min-height: 0;
-            overflow: hidden; /* Prevent overflow */
-        }
+        .control-box.actions { flex: 0 0 auto; }
+        .control-box.stats { flex: 1; min-height: 0; overflow: hidden; }
 
         .control-box h3 {
             color: white;
@@ -235,10 +223,7 @@
             background: white;
             padding: 1vh;
             border-radius: 1vh;
-            flex: 1; /* Allow to take space */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            margin-bottom: 1vh;
         }
 
         .info-row {
@@ -255,38 +240,70 @@
         .info-label { color: #764ba2; font-weight: bold; }
         .info-value { color: #f5576c; font-weight: bold; font-size: 2vh; }
 
-        .total-box {
+        /* Answer Section Styles */
+        .answer-section {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 1vh;
+            padding: 1.5vh;
             border-radius: 1vh;
+            margin-bottom: 1vh;
+            color: white;
             text-align: center;
-            font-size: 2vh;
-            font-weight: bold;
-            margin-top: 1vh;
-            flex-shrink: 0;
         }
 
-        .formula-box {
+        .answer-section label {
+            display: block;
+            margin-bottom: 0.8vh;
+            font-size: 1.8vh;
+            font-weight: bold;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1vh;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 0.8vh;
+            border-radius: 0.8vh;
+            border: none;
+            font-size: 2vh;
+            text-align: center;
+            font-weight: bold;
+            color: #764ba2;
+            width: 100%;
+        }
+
+        input[type="number"]:focus {
+            outline: 0.3vh solid #764ba2;
+        }
+
+        .btn-check {
+            flex: 1;
+            background: #764ba2;
+            color: white;
+            border: 0.2vh solid white;
+        }
+
+        .feedback-box {
             background: rgba(255, 255, 255, 0.95);
             padding: 1vh;
             border-radius: 1vh;
-            margin-top: 1vh;
             border: 0.2vh dashed #764ba2;
-            flex-shrink: 0;
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 5vh;
-        }
-
-        .formula {
             text-align: center;
             font-size: 1.8vh;
-            color: #764ba2;
             font-weight: bold;
-            direction: ltr;
+            color: #764ba2;
+            min-height: 0;
         }
+        
+        .feedback-success { color: #2ecc71; border-color: #2ecc71; }
+        .feedback-error { color: #e74c3c; border-color: #e74c3c; }
+
     </style>
 </head>
 <body>
@@ -328,7 +345,7 @@
                 </div>
 
                 <div class="control-box stats">
-                    <h3>📊 סִיכּוּם</h3>
+                    <h3>📊 פִּתְרוֹן</h3>
                     <div class="info-box">
                         <div class="info-row">
                             <span class="info-label">קְטַנּוֹת:</span>
@@ -338,17 +355,18 @@
                             <span class="info-label">גְּדוֹלוֹת:</span>
                             <span class="info-value" id="infoLarge">0</span>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">הֶפְרֵשׁ:</span>
-                            <span class="info-value" id="infoDiff">0</span>
+                    </div>
+
+                    <div class="answer-section">
+                        <label for="studentAnswer">כַּמָּה יֵשׁ בְּסַךְ הַכֹּל?</label>
+                        <div class="input-group">
+                            <input type="number" id="studentAnswer" placeholder="?">
+                            <button class="btn-check" onclick="checkAnswer()">בְּדוֹק</button>
                         </div>
                     </div>
-                    <div class="total-box">
-                        <div>סַךְ הַכֹּל</div>
-                        <div id="totalBubbles" style="font-size: 3vh; margin-top: 0.5vh; line-height: 1;">0</div>
-                    </div>
-                    <div class="formula-box">
-                        <div class="formula" id="formula">הוֹסִיפוּ בּוּעוֹת!</div>
+
+                    <div class="feedback-box" id="feedback">
+                        הַתְאִימוּ אֶת הַבּוּעוֹת לַסִּפּוּר וְכִתְבוּ אֶת הַתְּשׁוּבָה.
                     </div>
                 </div>
             </div>
@@ -358,6 +376,7 @@
     <script>
         let smallBubbles = 0;
         let largeBubbles = 0;
+        const targetLarge = 11; // From the story
 
         function updateDisplay() {
             // Update counts
@@ -365,21 +384,17 @@
             document.getElementById('largeCount').textContent = largeBubbles;
             document.getElementById('infoSmall').textContent = smallBubbles;
             document.getElementById('infoLarge').textContent = largeBubbles;
-            document.getElementById('infoDiff').textContent = largeBubbles - smallBubbles;
-            document.getElementById('totalBubbles').textContent = smallBubbles + largeBubbles;
-
-            // Update formula
-            if (smallBubbles > 0) {
-                document.getElementById('formula').innerHTML = 
-                    `${smallBubbles} + ${largeBubbles} = ${smallBubbles + largeBubbles}<br>` +
-                    `<span style="font-size: 1.4vh; color: #666; font-weight: normal;">(קְטַנּוֹת + גְּדוֹלוֹת = סַךְ הַכֹּל)</span>`;
-            } else {
-                document.getElementById('formula').textContent = 'הוֹסִיפוּ בּוּעוֹת!';
-            }
-
+            
             // Render bubbles
             renderBubbles('smallBubbles', smallBubbles, 'bubble-small');
             renderBubbles('largeBubbles', largeBubbles, 'bubble-large');
+
+            // Clear feedback slightly when changing bubbles to encourage re-checking
+            const feedbackEl = document.getElementById('feedback');
+            if (feedbackEl.classList.contains('feedback-success')) {
+                feedbackEl.className = 'feedback-box';
+                feedbackEl.textContent = 'הַמְשִׁיכוּ לִפְתֹּר...';
+            }
         }
 
         function renderBubbles(containerId, count, className) {
@@ -389,7 +404,6 @@
             for (let i = 0; i < count; i++) {
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${className}`;
-                // Stagger animation slightly
                 bubble.style.animationDelay = `${(i % 10) * 0.1}s`; 
                 bubble.textContent = '🫧';
                 container.appendChild(bubble);
@@ -413,7 +427,32 @@
         function resetAll() {
             smallBubbles = 0;
             largeBubbles = 0;
+            document.getElementById('studentAnswer').value = '';
+            document.getElementById('feedback').className = 'feedback-box';
+            document.getElementById('feedback').textContent = 'הַתְאִימוּ אֶת הַבּוּעוֹת לַסִּפּוּר וְכִתְבוּ אֶת הַתְּשׁוּבָה.';
             updateDisplay();
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('studentAnswer').value);
+            const feedbackEl = document.getElementById('feedback');
+            
+            // 1. Check if the setup matches the story
+            if (largeBubbles !== targetLarge) {
+                feedbackEl.className = 'feedback-box feedback-error';
+                feedbackEl.innerHTML = `שִׂימוּ לֵב: בַּסִּפּוּר יֵשׁ <strong>${targetLarge}</strong> בּוּעוֹת גְּדוֹלוֹת.<br>הַתְאִימוּ אֶת הַכַּמּוּת.`;
+                return;
+            }
+
+            // 2. Check the math
+            const correctTotal = smallBubbles + largeBubbles;
+            if (userAnswer === correctTotal) {
+                feedbackEl.className = 'feedback-box feedback-success';
+                feedbackEl.innerHTML = `🎉 כָּל הַכָּבוֹד!<br>הַתְּשׁוּבָה הִיא ${correctTotal} בּוּעוֹת.`;
+            } else {
+                feedbackEl.className = 'feedback-box feedback-error';
+                feedbackEl.innerHTML = `נַסּוּ שׁוּב.<br>כַּמָּה זֶה ${smallBubbles} + ${largeBubbles}?`;
+            }
         }
 
         // Initialize
